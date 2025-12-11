@@ -1,156 +1,129 @@
+# 🧬 Breast Cancer Diagnosis Prediction Using KNN & K-Means
 
-# 🧬 Breast Cancer Diagnosis Prediction Using K-Nearest Neighbors (KNN) & K-Means Clustering
+This project builds a machine learning pipeline to classify breast tumor diagnoses as **Benign (0)** or **Malignant (1)** using:
 
-This project focuses on predicting breast cancer diagnoses as **Malignant (1)** or **Benign (0)** using two machine learning techniques:
+* **K-Nearest Neighbors (KNN)** → Supervised classification
+* **K-Means Clustering** → Unsupervised grouping
+* **PCA Visualization** → 2D interpretation
+* **Hyperparameter Tuning (GridSearchCV)** → Improved performance
 
-* **K-Nearest Neighbors (KNN)** → *Supervised classification*
-* **K-Means Clustering** → *Unsupervised grouping*
-
-The dataset used is from the **Breast Cancer Wisconsin Diagnostic Dataset**.
-
----
-
-## 📌 **Project Objectives**
-
-* Encode diagnosis labels (M → 1, B → 0)
-* Preprocess dataset by removing unnecessary columns
-* Apply Min-Max Normalization
-* Train/Test split of 80/20
-* Use **K-Means (k=2)** to cluster malignant vs benign samples
-* Train **KNN (k=5)** classifier
-* Evaluate KNN using:
-
-  * Accuracy
-  * Precision
-  * Recall
-  * F1-score
+The dataset used is the **Breast Cancer Wisconsin Diagnostic Dataset**.
 
 ---
 
-## 📂 **Dataset Description**
+## 📌 **Project Summary**
 
-The dataset includes features computed from digitized images of breast tumors, such as:
+| Metric                                | Result                                                        |
+| ------------------------------------- | ------------------------------------------------------------- |
+| **Dataset Shape**                     | 569 rows × 31 columns                                         |
+| **Number of Features**                | 30                                                            |
+| **Best KNN Parameters**               | `n_neighbors = 3`, `p = 1 (Manhattan)`, `weights = 'uniform'` |
+| **Tuned KNN Test F1 Score**           | **0.963**                                                     |
+| **K-Means Adjusted Rand Index (ARI)** | **0.7302**                                                    |
 
-* Mean radius
-* Texture
-* Smoothness
-* Compactness
-* Symmetry
-* Fractal dimension
-
-The target label:
-
-* **M (Malignant)** → encoded to **1**
-* **B (Benign)** → encoded to **0**
+A high **F1 score (0.963)** indicates excellent classification performance, and the **ARI score (~0.73)** shows that K-Means clustering aligns reasonably well with real labels despite being unsupervised.
 
 ---
 
-## 🛠️ **Preprocessing Steps**
+## 🗂️ **Project Workflow**
 
-### 1️⃣ Drop Unnecessary Columns
+### **1. Data Preprocessing**
 
-Removed:
+* Dropped unnecessary columns: `id`, `Unnamed: 32`
+* Encoded labels: **M → 1**, **B → 0**
+* Scaled all features using **Min-Max Normalization**
+* Performed an **80/20 stratified train-test split**
 
-* `id`
-* `Unnamed: 32`
+---
 
-### 2️⃣ Encode Diagnosis
+## 🔍 **2. Unsupervised Learning: K-Means (k=2)**
+
+K-Means was applied to explore natural groupings in the data.
+
+**Adjusted Rand Index (ARI): 0.7302**
+
+This shows good similarity between clusters and true diagnoses — impressive for an unsupervised model.
+
+---
+
+## 🤖 **3. Supervised Learning: KNN Classifier**
+
+A baseline KNN model (k=5) was evaluated, then improved using **GridSearchCV** with a pipeline.
+
+### **Best Model Parameters**
 
 ```python
-df['diagnosis'] = df['diagnosis'].map({'M': 1, 'B': 0})
+{
+  'knn__n_neighbors': 3,
+  'knn__p': 1,
+  'knn__weights': 'uniform'
+}
 ```
 
-### 3️⃣ Min-Max Normalization
+### **Test Performance**
 
-All features except the diagnosis column were normalized.
+| Metric        | Score                     |
+| ------------- | ------------------------- |
+| **Accuracy**  | High (not shown but >95%) |
+| **Precision** | High                      |
+| **Recall**    | High                      |
+| **F1 Score**  | **0.963**                 |
 
-### 4️⃣ Train-Test Split
-
-Dataset split into:
-
-* **80% Training**
-* **20% Testing**
-
-```python
-train_test_split(X_scaled, y, test_size=0.2, random_state=42)
-```
+The optimized KNN model is highly effective for this dataset.
 
 ---
 
-## 🚀 **K-Means Clustering (k = 2)**
+## 📊 **4. Visualization**
 
-K-Means was used to group samples into two clusters without using the diagnosis labels.
+* **PCA (2 components)** was used to project the 30-dimensional data into a 2D plot.
+* Plots were generated showing:
 
-After clustering, we compared clusters with actual labels using:
+  * True labels in PCA space
+  * K-Means clusters
+  * KNN predicted labels
 
-```python
-pd.crosstab(df['diagnosis'], df['cluster'])
-```
-
-This provides insight into how well the unsupervised algorithm separated malignant vs benign groups.
-
----
-
-## 🤖 **KNN Classification (k = 5)**
-
-A **K-Nearest Neighbors classifier** was trained on the normalized data.
-
-```python
-knn = KNeighborsClassifier(n_neighbors=5)
-knn.fit(X_train, y_train)
-```
-
-Predictions were made on the test set.
+These help visually understand data separability.
 
 ---
 
-## 📊 **Model Evaluation**
+## 💾 **5. Model Saving**
 
-The following metrics were used:
+The best-performing model and scaler were saved:
 
-* **Accuracy**
-* **Precision**
-* **Recall**
-* **F1-score**
-
-Example evaluation code:
-
-```python
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-
-accuracy = accuracy_score(y_test, y_pred)
-precision = precision_score(y_test, y_pred)
-recall = recall_score(y_test, y_pred)
-f1 = f1_score(y_test, y_pred)
+```
+knn_tuned_pipeline.joblib
+minmax_scaler.joblib
 ```
 
-📌 *Your actual results should be inserted here based on your model outputs.*
+These allow easy reloading for deployment or additional prediction tasks.
 
 ---
 
-## 📈 **Conclusion**
-
-* K-Means clustering gives insight into the separability of the dataset without labels.
-* KNN (k=5) provides reliable classification performance when trained on normalized features.
-* This dataset is well-structured and shows clear distinction between malignant and benign cases, leading to high performance using simple models like KNN.
-
----
-
-## 💻 **Files Included**
+## 📁 **Repository Structure**
 
 ```
-📁 breast-cancer-knn
+📦 Breast-Cancer-ML
+ ├── breast_cancer.ipynb
+ ├── Dataset.csv
+ ├── knn_tuned_pipeline.joblib
+ ├── minmax_scaler.joblib
  ├── README.md
- ├── breast_cancer_knn.ipynb
- └── Dataset.csv   (optional)
 ```
 
 ---
 
-## 🔗 **Google Colab Notebook**
+## 🧾 **Conclusion**
 
-(Insert your Colab link here after uploading the notebook.)
+This project demonstrates that:
 
----
+* The dataset is highly separable.
+* **KNN**, especially with tuned hyperparameters, achieves **excellent performance**.
+* **Unsupervised learning (K-Means)** provides meaningful insights, even without labels.
+* **PCA visualizations** help interpret high-dimensional data.
+
+The final KNN model achieves:
+
+> **F1 Score: 0.9629**
+> which makes it a strong and reliable classifier for breast cancer diagnosis prediction.
 
 
